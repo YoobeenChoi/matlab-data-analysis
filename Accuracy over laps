@@ -1,0 +1,55 @@
+filename = 'event_table_MR.xlsx'; % name of the file
+sheets = sheetnames(filename); 
+
+all_accuracies = zeros(38, 8);
+
+for subj = 1:38
+    sheetname = sheets{subj};
+    data = readtable(filename, 'Sheet', sheetname);
+    
+    lap_data = data{:, 1}; 
+    answer_data = data{:, 15}; 
+    
+    subject_accuracies = zeros(1, 8);
+    
+    for lap = 1:8
+        lap_indices = lap_data == lap;
+        lap_answers = answer_data(lap_indices);
+        
+        correct_answers = sum(lap_answers == 1);
+        total_trials = 4;  
+        
+        accuracy = (correct_answers / total_trials) * 100;
+        subject_accuracies(lap) = accuracy;
+    end
+    
+    all_accuracies(subj, :) = subject_accuracies;
+end
+
+
+anova_data = array2table(all_accuracies, 'VariableNames', ...
+    {'Lap1', 'Lap2', 'Lap3', 'Lap4', 'Lap5', 'Lap6', 'Lap7', 'Lap8'});
+
+WithinDesign = table((1:8)', 'VariableNames', {'Lap'});
+
+
+rm_model = fitrm(anova_data, 'Lap1-Lap8 ~ 1');
+
+
+ranova_result = ranova(rm_model);
+disp(ranova_result);
+
+mean_accuracy = mean(all_accuracies);
+sem_accuracy = std(all_accuracies) / sqrt(38);
+
+figure;
+errorbar(1:8, mean_accuracy, sem_accuracy, '-o', 'LineWidth', 2);
+xlabel('Lap Number');
+ylabel('Mean Accuracy (%)');
+title('Mean Accuracy Across Laps');
+xticks(1:8);
+ylim([0 100]);
+grid on;
+
+disp('Mean Accuracy for Each Lap:');
+disp(mean_accuracy);
