@@ -40,3 +40,12 @@ end
 ylim([0 max_rt + 0.5]);  % Set y-axis limit based on the data
 
 set(gca, 'FontSize', 12);  % Set axis font size
+
+% Perform a paired t-test to compare pre-ODT and post-ODT reaction times
+[~, p_value, ~, stats] = ttest(lap_0_rt, lap_9_rt);
+
+% Display the results of the t-test
+disp('Paired t-test results comparing Pre-ODT vs Post-ODT reaction times:');
+disp(['t-statistic: ', num2str(stats.tstat)]);
+disp(['p-value: ', num2str(p_value)]);
+disp(['Degrees of freedom: ', num2str(stats.df)]);
